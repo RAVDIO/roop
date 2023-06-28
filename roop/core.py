@@ -171,10 +171,10 @@ def start() -> None:
     temp_frame_paths = get_temp_frame_paths(roop.globals.target_path)
     for frame_processor in get_frame_processors_modules(roop.globals.frame_processors):
         update_status('Progressing...', frame_processor.NAME)
-        if frame_processor.NAME == 'ROOP.FACE-ENHANCER':
-            frame_processor.process_video(roop.globals.source_path, temp_frame_paths)
-        else:
+        if roop.globals.single_face_in_many_faces:
             frame_processor.process_video(roop.globals.source_path, roop.globals.target_face_path, temp_frame_paths)
+        else:
+            frame_processor.process_video(roop.globals.source_path, None, temp_frame_paths)
         frame_processor.post_process()
         release_resources()
     # handles fps

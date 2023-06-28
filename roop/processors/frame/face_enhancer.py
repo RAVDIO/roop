@@ -6,7 +6,7 @@ import gfpgan
 import roop.globals
 import roop.processors.frame.core
 from roop.core import update_status
-from roop.face_analyser import get_one_face
+from roop.face_analyser import get_many_faces, get_one_face, is_similar
 from roop.typing import Frame, Face
 from roop.utilities import conditional_download, resolve_relative_path, is_image, is_video
 from PIL import Image
@@ -55,21 +55,30 @@ def enhance_face(temp_frame: Frame) -> Frame:
             temp_frame,
             paste_back=True
         )
-    temp_frame = Image.blend(temp_frame_original, Image.fromarray(temp_frame), roop.globals.face_enhancer_weight)         
+        temp_frame = Image.blend(temp_frame_original, Image.fromarray(temp_frame), roop.globals.face_enhancer_weight)         
     return asarray(temp_frame)
 
 
-def process_frame(source_face: Face, temp_frame: Frame) -> Frame:
-    target_face = get_one_face(temp_frame)
-    if target_face:
-        temp_frame = enhance_face(temp_frame)
+def process_frame(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
+    if target_face == None:
+        found_face = get_one_face(temp_frame)
+        if found_face:
+            temp_frame = enhance_face(temp_frame)  
+    else:   
+        many_faces = get_many_faces(temp_frame)
+        if many_faces:
+            for found_face in many_faces:
+                if is_similar(target_face, found_face):
+                    temp_frame = enhance_face(temp_frame)
+                    break
     return temp_frame
 
 
 def process_frames(source_path: str, target_face_path: str, temp_frame_paths: List[str], update: Callable[[], None]) -> None:
+    target_face = get_one_face(cv2.imread(target_face_path))
     for temp_frame_path in temp_frame_paths:
         temp_frame = cv2.imread(temp_frame_path)
-        result = process_frame(None, temp_frame)
+        result = process_frame(None, target_face, temp_frame)
         cv2.imwrite(temp_frame_path, result)
         if update:
             update()
@@ -81,5 +90,5 @@ def process_image(source_path: str, target_path: str, output_path: str) -> None:
     cv2.imwrite(output_path, result)
 
 
-def process_video(source_path: str, temp_frame_paths: List[str]) -> None:
-    roop.processors.frame.core.process_video(None, None, temp_frame_paths, process_frames)
+def process_video(source_path: str, target_face_path: str, temp_frame_paths: List[str]) -> None:
+    roop.processors.frame.core.process_video(None, target_face_path, temp_frame_paths, process_frames)
