@@ -6,7 +6,6 @@ from roop.typing import Frame
 
 MAX_PROBABILITY = 0.85
 
-
 def predict_frame(target_frame: Frame) -> bool:
     image = Image.fromarray(target_frame)
     image = opennsfw2.preprocess_image(image, opennsfw2.Preprocessing.YAHOO)
