@@ -1,9 +1,11 @@
 import threading
 from typing import Any
 import insightface
+import numpy as np
+from numpy.linalg import norm
 
 import roop.globals
-from roop.typing import Frame
+from roop.typing import Frame, Face
 
 FACE_ANALYSER = None
 THREAD_LOCK = threading.Lock()
@@ -32,3 +34,9 @@ def get_many_faces(frame: Frame) -> Any:
         return get_face_analyser().get(frame)
     except IndexError:
         return None
+
+def is_similar(target_face: Face, found_face: Face) -> bool:
+    similarity = np.dot(target_face.embedding, found_face.embedding) / (norm(target_face.embedding) * norm(found_face.embedding))
+    if similarity > roop.globals.threshold_value:
+        return True
+    return False 

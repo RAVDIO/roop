@@ -225,7 +225,9 @@ def render_video_preview(video_path: str, size: Tuple[int, int], frame_number: i
 
 
 def update_threshold(threshold: int = 0) -> None:
-    roop.globals.threshold_value = threshold
+    formatThreshold = float("{:.2f}".format(threshold))
+    print(formatThreshold)
+    roop.globals.threshold_value = formatThreshold
 
 
 def toggle_preview() -> None:

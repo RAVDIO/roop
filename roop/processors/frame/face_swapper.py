@@ -2,13 +2,11 @@ from typing import Any, List, Callable
 import cv2
 import insightface
 import threading
-import numpy as np
-from numpy.linalg import norm
 
 import roop.globals
 import roop.processors.frame.core
 from roop.core import update_status
-from roop.face_analyser import get_one_face, get_many_faces
+from roop.face_analyser import get_one_face, get_many_faces, is_similar
 from roop.typing import Face, Frame
 from roop.utilities import conditional_download, resolve_relative_path, is_image, is_video
 
@@ -54,13 +52,6 @@ def post_process() -> None:
 
 def swap_face(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
     return get_face_swapper().get(temp_frame, target_face, source_face, paste_back=True)
-
-
-def is_similar(target_face: Face, found_face: Face) -> bool:
-    similarity = np.dot(target_face.embedding, found_face.embedding) / (norm(target_face.embedding) * norm(found_face.embedding))
-    if similarity > roop.globals.threshold_value:
-        return True
-    return False 
 
 
 def process_frame(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
