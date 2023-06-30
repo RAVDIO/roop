@@ -72,6 +72,11 @@ def parse_args() -> None:
     roop.globals.execution_threads = args.execution_threads
     roop.globals.face_enhancer_weight = args.face_enhancer_weight
 
+    if 'face_enhancer' in args.frame_processor:
+        roop.globals.face_enhancer = True
+    else:
+        roop.globals.face_enhancer = False
+
 
 def encode_execution_providers(execution_providers: List[str]) -> List[str]:
     return [execution_provider.replace('ExecutionProvider', '').lower() for execution_provider in execution_providers]

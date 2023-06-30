@@ -86,15 +86,27 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
 
     many_faces_value = ctk.BooleanVar(value=roop.globals.many_faces)
     many_faces_switch = ctk.CTkSwitch(root, text='Many faces', variable=many_faces_value, cursor='hand2', command=lambda: setattr(roop.globals, 'many_faces', many_faces_value.get()))
-    many_faces_switch.place(relx=0.4, rely=0.65)
+    many_faces_switch.place(relx=0.6, rely=0.6)
 
     single_face_in_many_faces_value = ctk.BooleanVar(value=roop.globals.single_face_in_many_faces)
     single_face_in_many_faces_switch = ctk.CTkSwitch(root, text='focus face', variable=single_face_in_many_faces_value, cursor='hand2', command=lambda: setattr(roop.globals, 'single_face_in_many_faces', single_face_in_many_faces_value.get()))
-    single_face_in_many_faces_switch.place(relx=0.6, rely=0.6)
+    single_face_in_many_faces_switch.place(relx=0.4, rely=0.65)
 
     threshold_slider = ctk.CTkSlider(root, from_=0, to=1, command=lambda threshold_value: update_threshold(threshold_value))
     threshold_slider.place(relx=0.6, rely=0.65, relwidth=0.3, relheight=0.025)
     threshold_slider.set(roop.globals.threshold_value)
+
+    face_enhancer_value = ctk.BooleanVar(value=roop.globals.face_enhancer)
+
+    def switch_processor() -> any: 
+        setattr(roop.globals, 'face_enhancer', face_enhancer_value.get())
+        if face_enhancer_value.get() == True:
+            roop.globals.frame_processors = ['face_enhancer']
+        else:
+            roop.globals.frame_processors = ['face_swapper']
+
+    face_enhancer_switch = ctk.CTkSwitch(root, text='Enhancer', variable=face_enhancer_value, cursor='hand2', command=switch_processor)
+    face_enhancer_switch.place(relx=0.4, rely=0.7)
 
     enhancer_weight_slider = ctk.CTkSlider(root, from_=0, to=1, command=lambda weight: update_enhancer_weight(weight))
     enhancer_weight_slider.place(relx=0.6, rely=0.7, relwidth=0.3, relheight=0.025)
@@ -118,6 +130,7 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
     donate_label.bind('<Button>', lambda event: webbrowser.open('https://github.com/sponsors/s0md3v'))
 
     return root
+
 
 
 def create_preview(parent: ctk.CTkToplevel) -> ctk.CTkToplevel:
