@@ -96,14 +96,18 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
     threshold_slider.place(relx=0.6, rely=0.65, relwidth=0.3, relheight=0.025)
     threshold_slider.set(roop.globals.threshold_value)
 
+    enhancer_weight_slider = ctk.CTkSlider(root, from_=0, to=1, command=lambda weight: update_enhancer_weight(weight))
+    enhancer_weight_slider.place(relx=0.6, rely=0.7, relwidth=0.3, relheight=0.025)
+    enhancer_weight_slider.set(roop.globals.face_enhancer_weight)
+
     start_button = ctk.CTkButton(root, text='Start', cursor='hand2', command=lambda: select_output_path(start))
-    start_button.place(relx=0.15, rely=0.75, relwidth=0.2, relheight=0.05)
+    start_button.place(relx=0.15, rely=0.8, relwidth=0.2, relheight=0.05)
 
     stop_button = ctk.CTkButton(root, text='Destroy', cursor='hand2', command=lambda: destroy())
-    stop_button.place(relx=0.4, rely=0.75, relwidth=0.2, relheight=0.05)
+    stop_button.place(relx=0.4, rely=0.8, relwidth=0.2, relheight=0.05)
 
     preview_button = ctk.CTkButton(root, text='Preview', cursor='hand2', command=lambda: toggle_preview())
-    preview_button.place(relx=0.65, rely=0.75, relwidth=0.2, relheight=0.05)
+    preview_button.place(relx=0.65, rely=0.8, relwidth=0.2, relheight=0.05)
 
     status_label = ctk.CTkLabel(root, text=None, justify='center')
     status_label.place(relx=0.1, rely=0.9, relwidth=0.8)
@@ -226,8 +230,14 @@ def render_video_preview(video_path: str, size: Tuple[int, int], frame_number: i
 
 def update_threshold(threshold: int = 0) -> None:
     formatThreshold = float("{:.2f}".format(threshold))
-    print(formatThreshold)
+    print("threshhold: ", formatThreshold)
     roop.globals.threshold_value = formatThreshold
+
+
+def update_enhancer_weight(weight: float = 0) -> None:
+    formatWeight = float("{:.2f}".format(weight))
+    print("enhancer weight: ", formatWeight)
+    roop.globals.face_enhancer_weight = formatWeight
 
 
 def toggle_preview() -> None:
