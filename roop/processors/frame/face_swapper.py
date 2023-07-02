@@ -6,7 +6,7 @@ import threading
 import roop.globals
 import roop.processors.frame.core
 from roop.core import update_status
-from roop.face_analyser import get_one_face, get_many_faces, is_similar, compute_cosine_distance
+from roop.face_analyser import get_one_face, get_many_faces, is_similar
 from roop.typing import Face, Frame
 from roop.utilities import conditional_download, resolve_relative_path, is_image, is_video
 
