@@ -100,6 +100,7 @@ def create_root(start: Callable[[], None], destroy: Callable[[], None]) -> ctk.C
 
     def switch_processor() -> any: 
         setattr(roop.globals, 'face_enhancer', face_enhancer_value.get())
+        print("Enhancer: ", face_enhancer_value.get())
         if face_enhancer_value.get() == True:
             roop.globals.frame_processors = ['face_enhancer']
         else:
