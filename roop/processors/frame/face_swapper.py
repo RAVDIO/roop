@@ -6,7 +6,7 @@ import threading
 import roop.globals
 import roop.processors.frame.core
 from roop.core import update_status
-from roop.face_analyser import get_one_face, get_many_faces, is_similar
+from roop.face_analyser import get_one_face, get_many_faces, is_similar, compute_cosine_distance
 from roop.typing import Face, Frame
 from roop.utilities import conditional_download, resolve_relative_path, is_image, is_video
 
@@ -61,6 +61,7 @@ def process_frame(source_face: Face, target_face: Face, temp_frame: Frame) -> Fr
             for found_face in many_faces:
                 if is_similar(target_face, found_face):
                     temp_frame = swap_face(source_face, found_face, temp_frame)
+                    break
     elif roop.globals.many_faces:
         many_faces = get_many_faces(temp_frame)
         if many_faces:
