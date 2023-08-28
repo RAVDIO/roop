@@ -2,6 +2,9 @@ from typing import Any, List, Callable
 import cv2
 import insightface
 import threading
+import pickle, glob, pathlib, shutil
+from insightface.app.common import Face as IFace
+from tqdm.notebook import tqdm
 
 import roop.globals
 import roop.processors.frame.core
@@ -39,6 +42,8 @@ def pre_check() -> bool:
 
 
 def pre_start() -> bool:
+    if roop.globals.source_path.endswith(".pkl"):
+        return True
     if not is_image(roop.globals.source_path):
         update_status('Select an image for source path.', NAME)
         return False
@@ -59,6 +64,16 @@ def post_process() -> None:
 def swap_face(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
     return get_face_swapper().get(temp_frame, target_face, source_face, paste_back=True)
 
+def read_source_face(path: str):
+    try:
+        return get_one_face(cv2.imread(path))
+    except Exception as e:
+        try:
+            with open(path, "rb") as f:
+                return IFace(pickle.load(f))
+        except Exception as e:
+            print("Failed to load checkpoint  : %s", e)
+            raise
 
 def process_frame(source_face: Face, reference_face: Face, temp_frame: Frame) -> Frame:
     if roop.globals.many_faces:
@@ -74,7 +89,7 @@ def process_frame(source_face: Face, reference_face: Face, temp_frame: Frame) ->
 
 
 def process_frames(source_path: str, temp_frame_paths: List[str], update: Callable[[], None]) -> None:
-    source_face = get_one_face(cv2.imread(source_path))
+    source_face = read_source_face(source_path)
     reference_face = None if roop.globals.many_faces else get_face_reference()
     for temp_frame_path in temp_frame_paths:
         temp_frame = cv2.imread(temp_frame_path)
