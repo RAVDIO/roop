@@ -2,6 +2,9 @@ from typing import Any, List, Callable
 import cv2
 import insightface
 import threading
+import pickle, glob, pathlib, shutil
+from insightface.app.common import Face as IFace
+from tqdm.notebook import tqdm
 
 import roop.globals
 import roop.processors.frame.core
@@ -32,6 +35,8 @@ def pre_check() -> bool:
 
 
 def pre_start() -> bool:
+    if roop.globals.source_path.endswith(".pkl"):
+        return True
     if not is_image(roop.globals.source_path):
         update_status('Select an image for source path.', NAME)
         return False
@@ -53,6 +58,16 @@ def post_process() -> None:
 def swap_face(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
     return get_face_swapper().get(temp_frame, target_face, source_face, paste_back=True)
 
+def read_reference_face(path: str):
+    try:
+        return get_one_face(cv2.imread(path))
+    except Exception as e:
+        try:
+            with open(path, "rb") as f:
+                return IFace(pickle.load(f))
+        except Exception as e:
+            print("Failed to load checkpoint  : %s", e)
+            raise
 
 def process_frame(source_face: Face, target_face: Face, temp_frame: Frame) -> Frame:
     if roop.globals.single_face_in_many_faces:
@@ -75,7 +90,7 @@ def process_frame(source_face: Face, target_face: Face, temp_frame: Frame) -> Fr
 
 
 def process_frames(source_path: str, target_face_path: str, temp_frame_paths: List[str], update: Callable[[], None]) -> None:
-    source_face = get_one_face(cv2.imread(source_path))
+    source_face = read_reference_face(source_path)
     target_face = None
     if target_face_path:
         target_face = get_one_face(cv2.imread(target_face_path))
@@ -87,11 +102,21 @@ def process_frames(source_path: str, target_face_path: str, temp_frame_paths: Li
             update()
 
 
-def process_image(source_path: str, target_path: str, output_path: str) -> None:
-    source_face = get_one_face(cv2.imread(source_path))
-    target_frame = cv2.imread(target_path)
-    result = process_frame(source_face, target_frame)
-    cv2.imwrite(output_path, result)
+def process_image(source_path: str, target_face_path: str, output_path: str) -> None:
+    target_face = None
+    if target_face_path:
+        target_face = get_one_face(cv2.imread(target_face_path))
+    source_paths = glob.glob(source_path)
+    for source_path in tqdm(source_paths):
+        if len(source_paths) > 1:
+            sp = pathlib.Path(source_path)
+            op = pathlib.Path(output_path)
+            output_path = str(op.parent.joinpath(f"{sp.stem}.jpg"))
+            shutil.copy(target_face_path, output_path)
+        source_face = read_reference_face(source_path)
+        result = process_frame(source_face, target_face, cv2.imread(output_path))
+        cv2.imwrite(output_path, result)
+        # print(output_path)
 
 
 def process_video(source_path: str, target_face_path: str, temp_frame_paths: List[str]) -> None:

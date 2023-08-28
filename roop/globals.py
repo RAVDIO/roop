@@ -19,4 +19,4 @@ execution_threads = None
 headless = None
 log_level = 'error'
 face_enhancer_weight = 0.5
-face_enhancer = False
+face_enhancer = True
